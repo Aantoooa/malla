@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           card.title = prereqNames ? `Prerrequisitos: ${prereqNames}` : "Sin prerrequisitos";
           card.innerHTML = `
+            <div class="course-id">ID: ${course.id}</div>
             <div class="course-name">${course.name}</div>
             <div class="course-credits">SCT: ${course.credits}</div>
           `;
