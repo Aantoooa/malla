@@ -172,3 +172,11 @@ h1 {
     font-size: 24px;
   }
 }
+
+.course-id {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
