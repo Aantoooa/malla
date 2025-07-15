@@ -74,3 +74,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initializeMalla();
 });
+console.log("El archivo script.js está funcionando.");
+console.log(COURSES);
