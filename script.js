@@ -1,11 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('malla-container');
+  const creditDisplay = document.getElementById('credit-total');
+  const creditMaxDisplay = document.getElementById('credit-max');
+  const progressPercentDisplay = document.getElementById('progress-percent');
+  const areaFilter = document.getElementById('area-filter');
   let selectedCourseId = null;
-
-  if (!container) {
-    console.warn("El contenedor 'malla-container' no fue encontrado.");
-    return;
-  }
 
   const YEAR_GROUPS = {
     "primer año": [1, 2],
@@ -15,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     "quinto año": [9, 10]
   };
 
+  const completedIds = new Set(JSON.parse(localStorage.getItem('completedCourses') || "[]"));
+
   function getYearLabel(level) {
     for (const [label, levels] of Object.entries(YEAR_GROUPS)) {
       if (levels.includes(level)) return label;
@@ -22,10 +23,26 @@ document.addEventListener('DOMContentLoaded', () => {
     return "otro año";
   }
 
+  function initializeAreaFilter() {
+    const areas = [...new Set(COURSES.map(c => c.area))].sort();
+    areas.forEach(area => {
+      const option = document.createElement('option');
+      option.value = area;
+      option.textContent = area;
+      areaFilter.appendChild(option);
+    });
+  }
+
   function initializeMalla() {
+    container.innerHTML = "";
+
+    const selectedArea = areaFilter.value;
+
     // Agrupar cursos por nivel
     const levelsMap = {};
     COURSES.forEach(course => {
+      if (selectedArea !== "all" && course.area !== selectedArea) return;
+
       if (!levelsMap[course.level]) {
         levelsMap[course.level] = [];
       }
@@ -53,19 +70,21 @@ document.addEventListener('DOMContentLoaded', () => {
         levelHeading.textContent = `Semestre ${level}`;
         levelColumn.appendChild(levelHeading);
 
-        levelsMap[level].forEach((course, index) => {
+        levelsMap[level].forEach(course => {
           const card = document.createElement('div');
           card.className = 'course-card';
           card.id = course.id;
 
-          // Tooltip de prerrequisitos
+          if (completedIds.has(course.id)) {
+            card.classList.add('completed');
+          }
+
           const prereqNames = course.prerequisites?.map(pr => {
             const found = COURSES.find(c => c.id === pr);
             return found ? found.name : pr;
           }).join(", ");
           card.title = prereqNames ? `Prerrequisitos: ${prereqNames}` : "Sin prerrequisitos";
 
-          // Contenido del curso
           card.innerHTML = `
             <div class="course-name">${course.name}</div>
             <div class="course-credits">SCT: ${course.credits}</div>
@@ -81,54 +100,62 @@ document.addEventListener('DOMContentLoaded', () => {
       yearSection.appendChild(semesterGrid);
       container.appendChild(yearSection);
     });
+
+    updateCreditProgress();
   }
 
-function handleCourseClick(courseId) {
-  const card = document.getElementById(courseId);
-  const course = COURSES.find(c => c.id === courseId);
+  function handleCourseClick(courseId) {
+    const card = document.getElementById(courseId);
+    const course = COURSES.find(c => c.id === courseId);
+    if (!card || !course) return;
 
-  if (!card || !course) return;
+    const isCompleted = card.classList.contains('completed');
+    card.classList.toggle('completed');
 
-  const isCompleted = card.classList.contains('completed');
+    if (isCompleted) {
+      completedIds.delete(courseId);
+    } else {
+      completedIds.add(courseId);
+    }
 
-  // Alternar estado completado
-  card.classList.toggle('completed');
+    localStorage.setItem('completedCourses', JSON.stringify([...completedIds]));
+    updateCreditProgress();
 
-  // Actualizar créditos
-  const creditDisplay = document.getElementById('credit-total');
-  let currentCredits = parseFloat(creditDisplay.textContent);
+    resetAllCards();
 
-  if (isCompleted) {
-    currentCredits -= course.credits;
-  } else {
-    currentCredits += course.credits;
+    if (!card.classList.contains('completed')) {
+      card.classList.add('selected');
+
+      course.prerequisites?.forEach(prereqId => {
+        const prereqCard = document.getElementById(prereqId);
+        if (prereqCard) prereqCard.classList.add('prerequisite');
+      });
+
+      const postrequisites = COURSES.filter(c => c.prerequisites.includes(courseId));
+      postrequisites.forEach(post => {
+        const postCard = document.getElementById(post.id);
+        if (postCard) postCard.classList.add('postrequisite');
+      });
+
+      selectedCourseId = courseId;
+    } else {
+      selectedCourseId = null;
+    }
   }
 
-  creditDisplay.textContent = currentCredits;
+  function updateCreditProgress() {
+    const completedCredits = [...completedIds].reduce((sum, id) => {
+      const course = COURSES.find(c => c.id === id);
+      return sum + (course?.credits || 0);
+    }, 0);
 
-  // Limpiar resaltado anterior
-  resetAllCards();
+    const totalCredits = COURSES.reduce((sum, c) => sum + c.credits, 0);
+    const percent = Math.round((completedCredits / totalCredits) * 100);
 
-  // Aplicar selección nueva si no se está completando
-  if (!card.classList.contains('completed')) {
-    card.classList.add('selected');
-
-    course.prerequisites?.forEach(prereqId => {
-      const prereqCard = document.getElementById(prereqId);
-      if (prereqCard) prereqCard.classList.add('prerequisite');
-    });
-
-    const postrequisites = COURSES.filter(c => c.prerequisites.includes(courseId));
-    postrequisites.forEach(post => {
-      const postCard = document.getElementById(post.id);
-      if (postCard) postCard.classList.add('postrequisite');
-    });
-
-    selectedCourseId = courseId;
-  } else {
-    selectedCourseId = null;
+    creditDisplay.textContent = completedCredits;
+    creditMaxDisplay.textContent = totalCredits;
+    progressPercentDisplay.textContent = `${percent}%`;
   }
-}
 
   function resetAllCards() {
     document.querySelectorAll('.course-card').forEach(card => {
@@ -136,5 +163,7 @@ function handleCourseClick(courseId) {
     });
   }
 
+  initializeAreaFilter();
   initializeMalla();
+  areaFilter.addEventListener('change', initializeMalla);
 });
