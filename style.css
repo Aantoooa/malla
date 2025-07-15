@@ -144,3 +144,19 @@ h1 {
     font-size: 24px;
   }
 }
+#credit-counter {
+  text-align: center;
+  font-size: 16px;
+  background-color: #eaf4ff;
+  padding: 10px 20px;
+  border-bottom: 2px solid #ccc;
+  margin-bottom: 20px;
+  color: #003366;
+  font-weight: bold;
+}
+
+.completed {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
