@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Malla Curricular Interactiva - Ingeniería Civil Informática</title>
 
-  <!-- Favicon (opcional, reemplaza con tu archivo si lo tienes) -->
+  <!-- Favicon (opcional) -->
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
 
-  <!-- Descripción para SEO y navegadores -->
+  <!-- Descripción para buscadores -->
   <meta name="description" content="Explora de forma visual e interactiva la malla curricular de Ingeniería Civil Informática." />
 
   <!-- Estilos -->
@@ -20,7 +20,7 @@
   </header>
 
   <!-- Panel de progreso académico -->
-  <div id="progress-panel">
+  <section id="progress-panel">
     <div>Créditos completados: <span id="credit-total">0</span> / <span id="credit-max">0</span></div>
     <div>Progreso: <span id="progress-percent">0%</span></div>
 
@@ -28,21 +28,21 @@
     <select id="area-filter">
       <option value="all">Todas las áreas</option>
     </select>
-  </div>
-
-  <!-- Leyenda visual o explicativa (se puede complementar desde JS) -->
-  <section class="legend">
-    <!-- Puedes usar este espacio para explicar colores o tipos de asignaturas -->
   </section>
 
-  <!-- Contenedor principal donde se renderizan los cursos -->
+  <!-- Leyenda visual (complementable desde JS) -->
+  <section class="legend">
+    <!-- Puedes mostrar aquí colores por departamento o asignaturas -->
+  </section>
+
+  <!-- Contenedor principal para la malla -->
   <main>
     <div id="malla-container">
-      <!-- El script insertará los cursos aquí -->
+      <!-- Aquí se renderizan los cursos dinámicamente -->
     </div>
   </main>
 
-  <!-- Carga de scripts (primero los datos, luego la lógica) -->
+  <!-- Scripts: primero datos, luego lógica -->
   <script src="cursos.js"></script>
   <script src="script.js"></script>
 </body>
