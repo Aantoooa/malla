@@ -1,0 +1,65 @@
+body {
+    font-family: sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #003366;
+}
+
+#malla-container {
+    display: grid;
+    /* Creamos 11 columnas, una para cada semestre */
+    grid-template-columns: repeat(11, 1fr);
+    gap: 8px;
+    padding: 10px;
+    max-width: 1600px;
+    margin: auto;
+}
+
+.course-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.course-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.course-name {
+    font-weight: bold;
+    flex-grow: 1;
+}
+
+.course-credits {
+    font-size: 11px;
+    color: #666;
+    text-align: right;
+}
+
+/* Clases para la interactividad */
+.selected {
+    background-color: #ffc107 !important; /* Amarillo para el seleccionado */
+    border-color: #e0a800;
+}
+
+.prerequisite {
+    background-color: #dc3545 !important; /* Rojo para prerrequisitos */
+    color: white;
+}
+
+.postrequisite {
+    background-color: #28a745 !important; /* Verde para los que desbloquea */
+    color: white;
+}
