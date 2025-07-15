@@ -1,66 +1,76 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('malla-container');
-    let selectedCourse = null;
+  const container = document.getElementById('malla-container');
+  let selectedCourseId = null;
 
-    // 1. Dibuja todos los cursos en la malla
+  if (!container) {
+    console.warn("El contenedor 'malla-container' no fue encontrado.");
+    return;
+  }
+
+  function initializeMalla() {
     COURSES.forEach(course => {
-        const card = document.createElement('div');
-        card.className = 'course-card';
-        card.id = course.id;
-        // Posiciona la tarjeta en la columna correcta del semestre
-        card.style.gridColumn = course.level;
+      const card = document.createElement('div');
+      card.className = 'course-card';
+      card.id = course.id;
+      card.style.gridColumn = course.level;
 
-        card.innerHTML = `
-            <div class="course-name">${course.name}</div>
-            <div class="course-credits">SCT: ${course.credits}</div>
-        `;
+      // Generar tooltip con los prerrequisitos si existen
+      let tooltipText = "";
+      if (course.prerequisites && course.prerequisites.length > 0) {
+        const prereqNames = course.prerequisites
+          .map(pr => {
+            const prereqCourse = COURSES.find(c => c.id === pr);
+            return prereqCourse ? prereqCourse.name : pr;
+          })
+          .join(", ");
+        tooltipText = `Prerrequisitos: ${prereqNames}`;
+      } else {
+        tooltipText = "Sin prerrequisitos";
+      }
 
-        card.addEventListener('click', () => handleCourseClick(course.id));
-        container.appendChild(card);
+      card.title = tooltipText;
+
+      card.innerHTML = `
+        <div class="course-name">${course.name}</div>
+        <div class="course-credits">SCT: ${course.credits}</div>
+      `;
+
+      card.addEventListener('click', () => handleCourseClick(course.id));
+      container.appendChild(card);
+    });
+  }
+
+  function handleCourseClick(courseId) {
+    resetAllCards();
+
+    if (selectedCourseId === courseId) {
+      selectedCourseId = null;
+      return;
+    }
+
+    selectedCourseId = courseId;
+    const course = COURSES.find(c => c.id === courseId);
+    const card = document.getElementById(courseId);
+
+    if (card) card.classList.add('selected');
+
+    course.prerequisites?.forEach(prereqId => {
+      const prereqCard = document.getElementById(prereqId);
+      if (prereqCard) prereqCard.classList.add('prerequisite');
     });
 
-    // 2. Función para manejar el clic en una asignatura
-    function handleCourseClick(courseId) {
-        // Limpia el estado anterior
-        resetAllCards();
+    const postrequisites = COURSES.filter(c => c.prerequisites.includes(courseId));
+    postrequisites.forEach(post => {
+      const postCard = document.getElementById(post.id);
+      if (postCard) postCard.classList.add('postrequisite');
+    });
+  }
 
-        const clickedCard = document.getElementById(courseId);
+  function resetAllCards() {
+    document.querySelectorAll('.course-card').forEach(card => {
+      card.classList.remove('selected', 'prerequisite', 'postrequisite');
+    });
+  }
 
-        // Si se hace clic en el mismo curso, solo se deselecciona
-        if (selectedCourse === courseId) {
-            selectedCourse = null;
-            return;
-        }
-
-        selectedCourse = courseId;
-        const courseData = COURSES.find(c => c.id === courseId);
-
-        // Resalta el curso seleccionado
-        clickedCard.classList.add('selected');
-
-        // Resalta los prerrequisitos
-        if (courseData.prerequisites) {
-            courseData.prerequisites.forEach(prereqId => {
-                document.getElementById(prereqId)?.classList.add('prerequisite');
-            });
-        }
-
-        // Resalta las asignaturas que este curso desbloquea (post-requisitos)
-        const postrequisites = findPostrequisites(courseId);
-        postrequisites.forEach(postreq => {
-            document.getElementById(postreq.id)?.classList.add('postrequisite');
-        });
-    }
-
-    // 3. Función para limpiar el resaltado de todas las tarjetas
-    function resetAllCards() {
-        document.querySelectorAll('.course-card').forEach(card => {
-            card.classList.remove('selected', 'prerequisite', 'postrequisite');
-        });
-    }
-
-    // 4. Función para encontrar qué cursos tienen a 'courseId' como prerrequisito
-    function findPostrequisites(courseId) {
-        return COURSES.filter(course => course.prerequisites.includes(courseId));
-    }
+  initializeMalla();
 });
