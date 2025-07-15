@@ -94,28 +94,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!card || !course) return;
 
     const isCompleted = card.classList.contains('completed');
-    const isInProgress = card.classList.contains('in-progress');
     const unmetPrereqs = course.prerequisites.filter(pr => !completedIds.has(pr));
 
-    if (!isInProgress && !isCompleted) {
-      // Primer clic: verificar prerrequisitos para iniciar progreso
-      if (unmetPrereqs.length > 0) {
-        alert(`No puedes avanzar con "${course.name}".\nPrerrequisitos pendientes: ${unmetPrereqs.join(', ')}`);
-        return;
-      }
-      card.classList.add('in-progress');
+    if (!isCompleted && unmetPrereqs.length > 0) {
+      alert(`No puedes marcar "${course.name}" como completado.\nPrerrequisitos pendientes: ${unmetPrereqs.join(', ')}`);
       return;
     }
 
-    if (isInProgress) {
-      // Segundo clic: marcar como completado
-      card.classList.remove('in-progress');
-      card.classList.add('completed');
-      completedIds.add(courseId);
-    } else if (isCompleted) {
-      // Tercer clic: desmarcar completado
-      card.classList.remove('completed');
+    card.classList.toggle('completed');
+
+    if (isCompleted) {
       completedIds.delete(courseId);
+    } else {
+      completedIds.add(courseId);
     }
 
     localStorage.setItem('completedCourses', JSON.stringify([...completedIds]));
