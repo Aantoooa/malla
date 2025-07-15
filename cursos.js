@@ -98,7 +98,7 @@ const COURSES = [
    {
     "id": " ING104",
     "name": "LABORATORIO DE CIENCIAS",
-    "level": 1,
+    "level": 2,
     "credits": 5.0,
     "area": "DECANATO FACULTAD DE INGENIERIA",
     "prerequisites": []
@@ -106,7 +106,7 @@ const COURSES = [
   
     "id": " ING101",
     "name": "-INTRODUCCIÓN AL DISEÑO DE INGENIERÍA",
-    "level": 1,
+    "level": 2,
     "credits": 5.0,
     "area": "DECANATO FACULTAD DE INGENIERIA",
     "prerequisites": []
