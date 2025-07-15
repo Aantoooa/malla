@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const creditMaxDisplay = document.getElementById('credit-max');
   const progressPercentDisplay = document.getElementById('progress-percent');
   const areaFilter = document.getElementById('area-filter');
-  let selectedCourseId = null;
 
+  const completedIds = new Set(JSON.parse(localStorage.getItem('completedCourses') || "[]"));
   const YEAR_GROUPS = {
     "primer año": [1, 2],
     "segundo año": [3, 4],
@@ -13,8 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     "cuarto año": [7, 8],
     "quinto año": [9, 10]
   };
-
-  const completedIds = new Set(JSON.parse(localStorage.getItem('completedCourses') || "[]"));
 
   function initializeAreaFilter() {
     areaFilter.innerHTML = '<option value="all">Todas las áreas</option>';
@@ -59,9 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
           card.className = 'course-card';
           card.id = course.id;
 
-          if (completedIds.has(course.id)) {
-            card.classList.add('completed');
-          }
+          if (completedIds.has(course.id)) card.classList.add('completed');
 
           const prereqNames = course.prerequisites.map(pr => {
             const found = COURSES.find(c => c.id === pr);
@@ -69,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }).join(", ");
 
           card.title = prereqNames ? `Prerrequisitos: ${prereqNames}` : "Sin prerrequisitos";
+
           card.innerHTML = `
             <div class="course-id">ID: ${course.id}</div>
             <div class="course-name">${course.name}</div>
@@ -95,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!card || !course) return;
 
     const isCompleted = card.classList.contains('completed');
-    const unmetPrereqs = course.prerequisites.filter(pr => !completedIds.has(pr));
+    const unmetPrereqs = course.prerequisites.filter(id => !completedIds.has(id));
 
     if (!isCompleted && unmetPrereqs.length > 0) {
       alert(`No puedes marcar "${course.name}" como completado.\nPrerrequisitos pendientes: ${unmetPrereqs.join(', ')}`);
@@ -103,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     card.classList.toggle('completed');
-
     if (isCompleted) {
       completedIds.delete(courseId);
     } else {
@@ -117,20 +113,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!card.classList.contains('completed')) {
       card.classList.add('selected');
 
-      course.prerequisites.forEach(prereqId => {
-        const prereqCard = document.getElementById(prereqId);
+      course.prerequisites.forEach(id => {
+        const prereqCard = document.getElementById(id);
         if (prereqCard) prereqCard.classList.add('prerequisite');
       });
 
-      const postrequisites = COURSES.filter(c => c.prerequisites.includes(courseId));
-      postrequisites.forEach(post => {
+      COURSES.filter(c => c.prerequisites.includes(courseId)).forEach(post => {
         const postCard = document.getElementById(post.id);
         if (postCard) postCard.classList.add('postrequisite');
       });
-
-      selectedCourseId = courseId;
-    } else {
-      selectedCourseId = null;
     }
   }
 
