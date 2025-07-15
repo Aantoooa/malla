@@ -2,21 +2,52 @@ body {
   font-family: sans-serif;
   background-color: #f4f4f4;
   color: #333;
+  margin: 0;
+  padding-bottom: 50px;
 }
 
 h1 {
   text-align: center;
   color: #003366;
   margin-top: 20px;
+  font-size: 28px;
 }
 
-#malla-container {
-  display: grid;
-  grid-template-columns: repeat(11, 1fr); /* 11 semestres */
-  gap: 8px;
-  padding: 20px;
-  max-width: 1600px;
-  margin: auto;
+.year-block {
+  margin-bottom: 40px;
+  padding: 10px;
+  border-top: 2px solid #ccc;
+}
+
+.year-block h2 {
+  text-align: center;
+  color: #005a9c;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.semester-grid {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.semester-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 160px;
+  padding: 10px;
+}
+
+.semester-column h3 {
+  background-color: #e3e3e3;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 15px;
+  border-radius: 4px;
 }
 
 /* Tarjeta de curso */
@@ -31,15 +62,14 @@ h1 {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  position: relative; /* Para que el tooltip se posicione correctamente */
+  position: relative;
 }
 
 .course-card:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Contenido de la tarjeta */
 .course-name {
   font-weight: bold;
   flex-grow: 1;
@@ -67,7 +97,7 @@ h1 {
   color: white;
 }
 
-/* Estilo del tooltip personalizado */
+/* Tooltip personalizado */
 .course-card[title] {
   position: relative;
 }
@@ -96,4 +126,21 @@ h1 {
   border-style: solid;
   border-color: transparent transparent rgba(0, 0, 0, 0.8) transparent;
   z-index: 9;
+}
+
+/* Responsive para pantallas pequeñas */
+@media screen and (max-width: 768px) {
+  .semester-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .semester-column {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
 }
