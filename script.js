@@ -1,11 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Elementos del DOM
   const container = document.getElementById('malla-container');
   const creditDisplay = document.getElementById('credit-total');
   const creditMaxDisplay = document.getElementById('credit-max');
   const progressPercentDisplay = document.getElementById('progress-percent');
   const areaFilter = document.getElementById('area-filter');
-  let selectedCourseId = null;
 
+  // Estado de selección
+  let selectedCourseId = null;
+  const completedIds = new Set(JSON.parse(localStorage.getItem('completedCourses') || "[]"));
+
+  // Mapeo por año
   const YEAR_GROUPS = {
     "primer año": [1, 2],
     "segundo año": [3, 4],
@@ -14,8 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     "quinto año": [9, 10]
   };
 
-  const completedIds = new Set(JSON.parse(localStorage.getItem('completedCourses') || "[]"));
-
   function getYearLabel(level) {
     for (const [label, levels] of Object.entries(YEAR_GROUPS)) {
       if (levels.includes(level)) return label;
@@ -23,7 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
     return "otro año";
   }
 
+  // Rellenar el filtro por área
   function initializeAreaFilter() {
+    areaFilter.innerHTML = '<option value="all">Todas las áreas</option>';
     const areas = [...new Set(COURSES.map(c => c.area))].sort();
     areas.forEach(area => {
       const option = document.createElement('option');
@@ -33,44 +38,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Construir la malla visual
   function initializeMalla() {
     container.innerHTML = "";
-
     const selectedArea = areaFilter.value;
 
-    // Agrupar cursos por nivel
     const levelsMap = {};
     COURSES.forEach(course => {
       if (selectedArea !== "all" && course.area !== selectedArea) return;
-
-      if (!levelsMap[course.level]) {
-        levelsMap[course.level] = [];
-      }
+      if (!levelsMap[course.level]) levelsMap[course.level] = [];
       levelsMap[course.level].push(course);
     });
 
-    // Agrupar por año académico
     Object.entries(YEAR_GROUPS).forEach(([yearName, levels]) => {
       const yearSection = document.createElement('section');
       yearSection.className = 'year-block';
-      const yearTitle = document.createElement('h2');
-      yearTitle.textContent = yearName.toUpperCase();
-      yearSection.appendChild(yearTitle);
+      yearSection.innerHTML = `<h2>${yearName.toUpperCase()}</h2>`;
 
       const semesterGrid = document.createElement('div');
       semesterGrid.className = 'semester-grid';
 
       levels.forEach(level => {
-        if (!levelsMap[level]) return;
+        const courses = levelsMap[level];
+        if (!courses) return;
 
         const levelColumn = document.createElement('div');
         levelColumn.className = 'semester-column';
+        levelColumn.innerHTML = `<h3>Semestre ${level}</h3>`;
 
-        const levelHeading = document.createElement('h3');
-        levelHeading.textContent = `Semestre ${level}`;
-        levelColumn.appendChild(levelHeading);
-
-        levelsMap[level].forEach(course => {
+        courses.forEach(course => {
           const card = document.createElement('div');
           card.className = 'course-card';
           card.id = course.id;
@@ -79,10 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
             card.classList.add('completed');
           }
 
-          const prereqNames = course.prerequisites?.map(pr => {
-            const found = COURSES.find(c => c.id === pr);
-            return found ? found.name : pr;
-          }).join(", ");
+          const prereqNames = course.prerequisites
+            .map(pr => {
+              const found = COURSES.find(c => c.id === pr);
+              return found ? found.name : pr;
+            })
+            .join(", ");
+
           card.title = prereqNames ? `Prerrequisitos: ${prereqNames}` : "Sin prerrequisitos";
 
           card.innerHTML = `
@@ -104,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCreditProgress();
   }
 
+  // Alternar selección de curso completado
   function handleCourseClick(courseId) {
     const card = document.getElementById(courseId);
     const course = COURSES.find(c => c.id === courseId);
@@ -120,13 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     localStorage.setItem('completedCourses', JSON.stringify([...completedIds]));
     updateCreditProgress();
-
     resetAllCards();
 
     if (!card.classList.contains('completed')) {
       card.classList.add('selected');
-
-      course.prerequisites?.forEach(prereqId => {
+      course.prerequisites.forEach(prereqId => {
         const prereqCard = document.getElementById(prereqId);
         if (prereqCard) prereqCard.classList.add('prerequisite');
       });
@@ -143,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Actualizar contador y porcentaje
   function updateCreditProgress() {
     const completedCredits = [...completedIds].reduce((sum, id) => {
       const course = COURSES.find(c => c.id === id);
@@ -150,19 +149,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 0);
 
     const totalCredits = COURSES.reduce((sum, c) => sum + c.credits, 0);
-    const percent = Math.round((completedCredits / totalCredits) * 100);
+    const percent = totalCredits > 0 ? Math.round((completedCredits / totalCredits) * 100) : 0;
 
     creditDisplay.textContent = completedCredits;
     creditMaxDisplay.textContent = totalCredits;
     progressPercentDisplay.textContent = `${percent}%`;
   }
 
+  // Limpiar resaltado visual
   function resetAllCards() {
     document.querySelectorAll('.course-card').forEach(card => {
       card.classList.remove('selected', 'prerequisite', 'postrequisite');
     });
   }
 
+  // Inicializar filtros y render
   initializeAreaFilter();
   initializeMalla();
   areaFilter.addEventListener('change', initializeMalla);
