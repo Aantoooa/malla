@@ -87,54 +87,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateCreditProgress();
   }
-  
-function handleCourseClick(courseId) {
-  const card = document.getElementById(courseId);
-  const course = COURSES.find(c => c.id === courseId);
-  if (!card || !course) return;
 
-  // Validar que los prerrequisitos estén completos
-  const unmetPrereqs = course.prerequisites.filter(prereqId => !completedIds.has(prereqId));
-  const isCompleted = card.classList.contains('completed');
+  function handleCourseClick(courseId) {
+    const card = document.getElementById(courseId);
+    const course = COURSES.find(c => c.id === courseId);
+    if (!card || !course) return;
 
-  if (!isCompleted && unmetPrereqs.length > 0) {
-    alert(`No puedes marcar "${course.name}" como completado.\nPrerrequisitos pendientes: ${unmetPrereqs.join(', ')}`);
-    return;
+    const isCompleted = card.classList.contains('completed');
+    const unmetPrereqs = course.prerequisites.filter(pr => !completedIds.has(pr));
+
+    if (!isCompleted && unmetPrereqs.length > 0) {
+      alert(`No puedes marcar "${course.name}" como completado.\nPrerrequisitos pendientes: ${unmetPrereqs.join(', ')}`);
+      return;
+    }
+
+    card.classList.toggle('completed');
+
+    if (isCompleted) {
+      completedIds.delete(courseId);
+    } else {
+      completedIds.add(courseId);
+    }
+
+    localStorage.setItem('completedCourses', JSON.stringify([...completedIds]));
+    updateCreditProgress();
+    resetAllCards();
+
+    if (!card.classList.contains('completed')) {
+      card.classList.add('selected');
+
+      course.prerequisites.forEach(prereqId => {
+        const prereqCard = document.getElementById(prereqId);
+        if (prereqCard) prereqCard.classList.add('prerequisite');
+      });
+
+      const postrequisites = COURSES.filter(c => c.prerequisites.includes(courseId));
+      postrequisites.forEach(post => {
+        const postCard = document.getElementById(post.id);
+        if (postCard) postCard.classList.add('postrequisite');
+      });
+
+      selectedCourseId = courseId;
+    } else {
+      selectedCourseId = null;
+    }
   }
 
-  // Alternar estado de completado
-  card.classList.toggle('completed');
-
-  if (isCompleted) {
-    completedIds.delete(courseId);
-  } else {
-    completedIds.add(courseId);
-  }
-
-  localStorage.setItem('completedCourses', JSON.stringify([...completedIds]));
-  updateCreditProgress();
-  resetAllCards();
-
-  if (!card.classList.contains('completed')) {
-    card.classList.add('selected');
-
-    course.prerequisites.forEach(prereqId => {
-      const prereqCard = document.getElementById(prereqId);
-      if (prereqCard) prereqCard.classList.add('prerequisite');
-    });
-
-    const postrequisites = COURSES.filter(c => c.prerequisites.includes(courseId));
-    postrequisites.forEach(post => {
-      const postCard = document.getElementById(post.id);
-      if (postCard) postCard.classList.add('postrequisite');
-    });
-
-    selectedCourseId = courseId;
-  } else {
-    selectedCourseId = null;
-  }
-}
-  
   function updateCreditProgress() {
     const completedCredits = [...completedIds].reduce((sum, id) => {
       const course = COURSES.find(c => c.id === id);
@@ -155,7 +153,6 @@ function handleCourseClick(courseId) {
     });
   }
 
-  // Inicializa todo
   initializeAreaFilter();
   initializeMalla();
   areaFilter.addEventListener('change', initializeMalla);
