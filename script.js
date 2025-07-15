@@ -83,18 +83,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function handleCourseClick(courseId) {
-    resetAllCards();
+function handleCourseClick(courseId) {
+  const card = document.getElementById(courseId);
+  const course = COURSES.find(c => c.id === courseId);
 
-    if (selectedCourseId === courseId) {
-      selectedCourseId = null;
-      return;
-    }
+  if (!card || !course) return;
 
-    selectedCourseId = courseId;
-    const course = COURSES.find(c => c.id === courseId);
-    const card = document.getElementById(courseId);
-    if (card) card.classList.add('selected');
+  const isCompleted = card.classList.contains('completed');
+
+  // Alternar estado completado
+  card.classList.toggle('completed');
+
+  // Actualizar créditos
+  const creditDisplay = document.getElementById('credit-total');
+  let currentCredits = parseFloat(creditDisplay.textContent);
+
+  if (isCompleted) {
+    currentCredits -= course.credits;
+  } else {
+    currentCredits += course.credits;
+  }
+
+  creditDisplay.textContent = currentCredits;
+
+  // Limpiar resaltado anterior
+  resetAllCards();
+
+  // Aplicar selección nueva si no se está completando
+  if (!card.classList.contains('completed')) {
+    card.classList.add('selected');
 
     course.prerequisites?.forEach(prereqId => {
       const prereqCard = document.getElementById(prereqId);
@@ -106,7 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const postCard = document.getElementById(post.id);
       if (postCard) postCard.classList.add('postrequisite');
     });
+
+    selectedCourseId = courseId;
+  } else {
+    selectedCourseId = null;
   }
+}
 
   function resetAllCards() {
     document.querySelectorAll('.course-card').forEach(card => {
