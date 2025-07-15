@@ -18,27 +18,31 @@
   <header>
     <h1>Malla Curricular Interactiva</h1>
   </header>
-<div id="progress-panel">
-  <div>Créditos completados: <span id="credit-total">0</span> / <span id="credit-max">0</span></div>
-  <div>Progreso: <span id="progress-percent">0%</span></div>
-  <label for="area-filter">Filtrar por área:</label>
-  <select id="area-filter">
-    <option value="all">Todas las áreas</option>
-  </select>
-</div>
 
-  <!-- Leyenda (puedes llenarla desde el script si lo deseas) -->
+  <!-- Panel de progreso académico -->
+  <div id="progress-panel">
+    <div>Créditos completados: <span id="credit-total">0</span> / <span id="credit-max">0</span></div>
+    <div>Progreso: <span id="progress-percent">0%</span></div>
+
+    <label for="area-filter">Filtrar por área:</label>
+    <select id="area-filter">
+      <option value="all">Todas las áreas</option>
+    </select>
+  </div>
+
+  <!-- Leyenda visual o explicativa (se puede complementar desde JS) -->
   <section class="legend">
-    <!-- Aquí puedes mostrar los colores/áreas de los cursos -->
+    <!-- Puedes usar este espacio para explicar colores o tipos de asignaturas -->
   </section>
-  <!-- Contenedor donde se mostrarán los cursos -->
+
+  <!-- Contenedor principal donde se renderizan los cursos -->
   <main>
     <div id="malla-container">
       <!-- El script insertará los cursos aquí -->
     </div>
   </main>
 
-  <!-- Scripts -->
+  <!-- Carga de scripts (primero los datos, luego la lógica) -->
   <script src="cursos.js"></script>
   <script src="script.js"></script>
 </body>
